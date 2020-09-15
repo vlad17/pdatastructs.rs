@@ -5,7 +5,7 @@ use std::fmt;
 use std::hash::{BuildHasher, BuildHasherDefault, Hash};
 use std::marker::PhantomData;
 
-use num_traits::{CheckedAdd, One, Unsigned, Zero};
+use num_traits::{CheckedAdd, One, SaturatingAdd, Unsigned, Zero};
 
 use crate::hash_utils::HashIterBuilder;
 
@@ -112,7 +112,7 @@ use crate::hash_utils::HashIterBuilder;
 pub struct CountMinSketch<T, C = usize, B = BuildHasherDefault<DefaultHasher>>
 where
     T: Hash,
-    C: CheckedAdd + Clone + One + Ord + Unsigned + Zero,
+    C: SaturatingAdd + CheckedAdd + Clone + One + Ord + Unsigned + Zero,
     B: BuildHasher + Clone + Eq,
 {
     table: Vec<C>,
@@ -125,7 +125,7 @@ where
 impl<T, C> CountMinSketch<T, C>
 where
     T: Hash,
-    C: CheckedAdd + Clone + One + Ord + Unsigned + Zero,
+    C: SaturatingAdd + CheckedAdd + Clone + One + Ord + Unsigned + Zero,
 {
     /// Create new CountMinSketch based on table size.
     ///
@@ -159,7 +159,7 @@ where
 impl<T, C, B> CountMinSketch<T, C, B>
 where
     T: Hash,
-    C: CheckedAdd + Clone + One + Ord + Unsigned + Zero,
+    C: CheckedAdd + SaturatingAdd + Clone + One + Ord + Unsigned + Zero,
     B: BuildHasher + Clone + Eq,
 {
     /// Same as `with_params` but with a specific `BuildHasher`.
@@ -274,7 +274,7 @@ where
             .table
             .iter()
             .zip(other.table.iter())
-            .map(|x| x.0.checked_add(x.1).unwrap())
+            .map(|x| x.0.saturating_add(x.1))
             .collect();
     }
 
